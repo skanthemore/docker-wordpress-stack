@@ -1,0 +1,45 @@
+services:
+  db:
+    image: mariadb:11.4
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASS}
+      MARIADB_DATABASE: ${MYSQL_DB}
+      MARIADB_USER: ${MYSQL_USER}
+      MARIADB_PASSWORD: ${MYSQL_PASS}
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:php8.3-apache
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - "80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DB}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASS}
+      WORDPRESS_URL: ${WORDPRESS_URL}
+    depends_on:
+      - db
+    volumes:
+      - ./web:/var/www/html
+    networks:
+      - default
+      - caddy
+    labels:
+      caddy: ${WP_HOST}
+      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.tls: ${CADDY_TLS_MODE}
+
+volumes:
+  mysql_data:
+
+networks:
+  caddy:
+    external: true
+    name: caddy
