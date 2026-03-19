@@ -46,7 +46,13 @@ The WordPress service is exposed internally and routed by Caddy using these labe
 
 ### 1) Configure environment
 
-Edit `.env` and set secure values:
+Create your local env file from the template:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` and set secure values:
 
 - `MYSQL_ROOT_PASS`
 - `MYSQL_PASS`
@@ -79,6 +85,7 @@ docker compose up -d
 From project root:
 
 ```bash
+mkdir -p web
 docker compose up -d --build
 ```
 
@@ -109,10 +116,10 @@ If your browser warns about the certificate, trust Caddy's local CA for your OS/
 .
 ├── docker-compose.yml        # WordPress + MariaDB stack
 ├── Dockerfile                # Custom WordPress image with WP-CLI
-├── .env                      # Runtime configuration
+├── .env.example              # Environment template (copy to .env)
 └── Caddy/
 	 ├── docker-compose.yml    # Shared Caddy reverse proxy
-	 └── web/                  # Optional static web root (if needed)
+	 └── web/                  # Optional static web root (kept empty)
 ```
 
 ---

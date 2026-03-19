@@ -1,0 +1,13 @@
+# Local environment
+.env
+!.env.example
+
+# Runtime WordPress files (bind mounts)
+/web/*
+!/web/.gitkeep
+/Caddy/web/*
+!/Caddy/web/.gitkeep
+
+# OS / logs
+.DS_Store
+*.log
