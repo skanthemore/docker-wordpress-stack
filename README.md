@@ -204,9 +204,26 @@ that uid on the host. If your editor cannot write to them:
 sudo chown -R $USER:$USER ./web
 ```
 
-Overriding the container's `user:` is deliberately not done here: the
-official image starts as root to bind port 80 and drops privileges itself,
-so forcing a uid breaks Apache's own startup.
+### Why this only bites on Linux
+
+On macOS this never happens, which is exactly why it is worth writing down:
+Docker Desktop runs containers inside a Linux VM and the file-sharing layer
+between the host and that VM rewrites ownership, so files always appear as
+yours no matter which uid wrote them. On Linux there is no VM and no
+translation — the container shares your kernel and your filesystem, so uid
+33 really is uid 33 on your disk.
+
+Moving a project from macOS to Linux does not introduce this bug. It removes
+the layer that was hiding it.
+
+### Why not just set `user:`
+
+The obvious fix — running the service as your own uid — breaks the image.
+Port 80 is privileged, so a non-root process cannot bind it, and the
+official entrypoint expects to start as root: it fixes ownership, prepares
+the configuration and drops to `www-data` on its own. Forcing a uid pulls
+the ground from under the process that was already handling this correctly.
+Hence the `chown` above: work with the image's design instead of against it.
 
 ---
 
