@@ -144,9 +144,12 @@ docker compose exec -T wordpress wp core install \
 ├── .env.example              # Environment template (copy to .env)
 ├── web/                      # WordPress document root (runtime, untracked)
 └── Caddy/
-	 ├── docker-compose.yml    # Shared Caddy reverse proxy
-	 └── web/                  # Optional static web root (kept empty)
+	 └── docker-compose.yml    # Shared Caddy reverse proxy
 ```
+
+Nothing but configuration is tracked here: eight text files, no WordPress
+core, no vendored dependencies. Everything else the stack needs is pulled
+from official images at run time.
 
 ---
 

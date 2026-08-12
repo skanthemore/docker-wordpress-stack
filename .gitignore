@@ -2,11 +2,9 @@
 .env
 !.env.example
 
-# Runtime WordPress files (bind mounts)
-/web/*
-!/web/.gitkeep
-/Caddy/web/*
-!/Caddy/web/.gitkeep
+# WordPress document root: created by the bind mount at runtime and never
+# tracked. The official image installs core here on first start.
+/web/
 
 # OS / logs
 .DS_Store
