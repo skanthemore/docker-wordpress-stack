@@ -8,7 +8,17 @@ A production-style local development stack for WordPress using Docker Compose, w
 - Persistent database and Caddy volumes
 - WP-CLI preinstalled in the custom WordPress image
 
-This setup is designed to look clean and professional on GitHub while staying simple to run.
+## Why it exists
+
+It began as a local mirror of a client project's server: same PHP and
+database versions, same reverse proxy in front, real HTTPS instead of plain
+`localhost`. Matching the target environment is what stops the familiar
+"works on my machine" class of bug — a PHP minor version or a TLS-only
+cookie behaving differently in production than in development.
+
+None of that project's code or data lives here. What remains is the shape of
+the environment, generalised into the base I now start local WordPress work
+from.
 
 ---
 
