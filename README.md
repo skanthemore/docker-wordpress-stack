@@ -60,17 +60,16 @@ Then edit `.env` and set secure values:
 - `WP_HOST`
 - `WORDPRESS_URL`
 
-Current defaults use:
-
-- `WP_HOST=yourgost.local`
-- `WORDPRESS_URL=https://yourgost.local`
+Every value in the template is a placeholder. The host defaults to
+`yourhost.local`; whatever you choose must match the `/etc/hosts` entry in
+the next step.
 
 ### 2) Add local DNS entry
 
 Map your local domain to localhost in `/etc/hosts`:
 
 ```bash
-127.0.0.1 yourgost.local
+127.0.0.1 yourhost.local
 ```
 
 ### 3) Start Caddy (global proxy)
@@ -85,7 +84,6 @@ docker compose up -d
 From project root:
 
 ```bash
-mkdir -p web
 docker compose up -d --build
 ```
 
@@ -94,16 +92,33 @@ docker compose up -d --build
 Go to:
 
 ```text
-https://yourgost.local
+https://yourhost.local
 ```
 
 If your browser warns about the certificate, trust Caddy's local CA for your OS/browser (expected in local `internal` mode).
+
+### 6) Install WordPress (optional)
+
+Finish the install in the browser, or do it in one command with the values
+already in your `.env`:
+
+```bash
+set -a && . ./.env && set +a
+docker compose exec -T wordpress wp core install \
+  --url="$WORDPRESS_URL" \
+  --title="$WP_TITLE" \
+  --admin_user="$WP_USER" \
+  --admin_password="$WP_PASSWORD" \
+  --admin_email="$WP_EMAIL" \
+  --skip-email --allow-root
+```
 
 ---
 
 ## Services and Versions
 
-- **WordPress**: `wordpress:php8.3-apache`
+- **WordPress**: `wordpress:php8.3-apache`, extended by `Dockerfile` and tagged
+  `skt/wordpress:php8.3-apache` so the upstream tag is never overwritten
 - **PHP**: 8.3 (stable)
 - **MariaDB**: `mariadb:11.4`
 - **Reverse Proxy**: `lucaslorentz/caddy-docker-proxy:latest`
@@ -117,6 +132,7 @@ If your browser warns about the certificate, trust Caddy's local CA for your OS/
 ├── docker-compose.yml        # WordPress + MariaDB stack
 ├── Dockerfile                # Custom WordPress image with WP-CLI
 ├── .env.example              # Environment template (copy to .env)
+├── web/                      # WordPress document root (runtime, untracked)
 └── Caddy/
 	 ├── docker-compose.yml    # Shared Caddy reverse proxy
 	 └── web/                  # Optional static web root (kept empty)
@@ -167,14 +183,17 @@ docker compose down
 
 ## Linux Permissions (bind mount)
 
-If you have write permission issues in the mounted WordPress files:
-
-1. Set your `UID` in `.env` (`echo $UID`)
-2. Fix ownership from project root:
+Apache inside the container writes as `www-data` (uid 33), so files created
+by WordPress — uploads, plugin installs, generated files — end up owned by
+that uid on the host. If your editor cannot write to them:
 
 ```bash
 sudo chown -R $USER:$USER ./web
 ```
+
+Overriding the container's `user:` is deliberately not done here: the
+official image starts as root to bind port 80 and drops privileges itself,
+so forcing a uid breaks Apache's own startup.
 
 ---
 
@@ -197,4 +216,4 @@ sudo chown -R $USER:$USER ./web
 
 ## License
 
-Use and adapt this stack for your own projects.
+MIT — see [LICENSE](./LICENSE). Use and adapt it for your own projects.
